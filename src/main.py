@@ -6,13 +6,17 @@ sg.theme('SystemDefaultForReal')   # Muda o tema da Janela
 # Extrutura da Janela
 layout = [
     [sg.Text('Olá! Escolha sua imagem para começar a editar:')],
+    [sg.Column([
+        [sg.Frame('', [[sg.Text('', size=(None, None))]], key='-QUADRO_ESQ-', expand_x=True)]
+    ], element_justification='right', expand_x=True),
+     sg.Column([
+        [sg.Frame('', [[sg.Text('', size=(None, None))]], key='-QUADRO_DIR-', expand_x=True)]
+    ], element_justification='left', expand_x=True)],
     [sg.InputText(key='-IMG_PATH-', readonly=True), sg.Button('Selecionar Imagem')],
-    [sg.Button('Ok'), sg.Button('Cancel')],
-    [sg.Push(),  # Centraliza o quadrado horizontalmente
-     sg.Frame('', [[sg.Text('', size=(900, 400), background_color='black')]],
-              pad=(20, 20), element_justification='center', key='-QUADRO-'),
-     sg.Push()]  # Centraliza o quadrado horizontalmente
+    [sg.Button('Ok'), sg.Button('Cancel')]
 ]
+
+
 
 # Cria a janela em tela cheia
 window = sg.Window(
