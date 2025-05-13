@@ -1,2 +1,3 @@
 pip install opencv-python numpy PySimpleGUI
 pip install opencv-python
+pip install pillow
