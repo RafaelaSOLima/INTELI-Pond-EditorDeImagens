@@ -58,7 +58,7 @@ layout = [
         )
     ],
     [sg.InputText(key='-IMG_PATH-', readonly=True), sg.Button('Selecionar Imagem')],
-    [sg.Button('Ok'), sg.Button('Cancel')]
+    [sg.Button('Salvar'), sg.Button('Cancelar')]
 ]
 
 window = sg.Window(
@@ -95,7 +95,7 @@ def resize_image(image_path, max_width, max_height):
 
 while True:
     event, values = window.read(timeout=100)
-    if event in (sg.WINDOW_CLOSED, 'Cancel'):
+    if event in (sg.WINDOW_CLOSED, 'Cancelar'):
         break
 
     if event == 'Selecionar Imagem':
