@@ -7,6 +7,14 @@ sg.theme('SystemDefaultForReal')
 
 layout = [
     [sg.Text('Olá! Escolha sua imagem para começar a editar:')],
+    [sg.Text('Filtros:'),
+     sg.Checkbox('Embaçado', key='-CHK_A-'),
+     sg.Checkbox('Nitido', key='-CHK_B-'),
+     sg.Checkbox('Invertido', key='-CHK_C-'),
+     sg.Checkbox('Alto Contraste', key='-CHK_D-'),
+     sg.Checkbox('Baixo Contraste', key='-CHK_E-'),
+     sg.Checkbox('Preto e Branco', key='-CHK_F-')],  
+
     [
         sg.Column(
             [
@@ -119,7 +127,7 @@ while True:
             window['-IMG_ESQ-'].update(data=resized_image)
             window['-IMG_DIR-'].update(data=resized_image)
 
-    if event == 'Ok':
+    if event == 'Salvar':
         print("Imagem selecionada:", values["-IMG_PATH-"])
 
 window.close()
