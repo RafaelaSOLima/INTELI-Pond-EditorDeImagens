@@ -174,8 +174,12 @@ while True:
         # Atualiza somente a imagem da esquerda com os filtros aplicados
         window['-IMG_ESQ-'].update(data=filtered_bytes)
 
-    if event == 'Salvar':
-        print("Imagem selecionada:", values["-IMG_PATH-"])
-        # Aqui você pode adicionar a lógica para salvar a imagem final, se desejar.
+    if event == 'Salvar' and base_img:
+        save_path = sg.popup_get_file('Salvar imagem como', save_as=True, file_types=(("PNG Files", "*.png"), ("JPEG Files", "*.jpg")))
+        
+        if save_path:  # Certifica-se de que o usuário escolheu um caminho válido
+            filtered_img = apply_filters(base_img, values)  # Aplica filtros antes de salvar
+            filtered_img.save(save_path)  # Salva a imagem editada no caminho escolhido
+            sg.popup('Imagem salva com sucesso!')
 
 window.close()
