@@ -21,8 +21,10 @@ layout = [
      sg.Checkbox('Invertido', key='-CHK_C-', enable_events=True),
      sg.Checkbox('Alto Contraste', key='-CHK_D-', enable_events=True),
      sg.Checkbox('Baixo Contraste', key='-CHK_E-', enable_events=True),
-     sg.Checkbox('Preto e Branco', key='-CHK_F-', enable_events=True)],
-    
+     sg.Checkbox('Preto e Branco', key='-CHK_F-', enable_events=True),
+     sg.Button('Rotacionar', key='-ROTATE-')],
+
+
     [
         sg.Column(
             [
@@ -73,8 +75,8 @@ layout = [
             expand_y=True
         )
     ],
-    [sg.InputText(key='-IMG_PATH-', readonly=True), sg.Button('Selecionar Imagem')],
-    [sg.Button('Salvar'), sg.Button('Cancelar')]
+    [sg.InputText(key='-IMG_PATH-', readonly=True), sg.Button('Selecionar Imagem'), sg.Button('Salvar'), sg.Button('Cancelar')],
+    
 ]
 
 window = sg.Window(
@@ -87,10 +89,7 @@ window = sg.Window(
 window.Maximize()
 
 def load_and_resize_image(image_path, max_width, max_height):
-    """
-    Abre e redimensiona a imagem mantendo a proporção para o tamanho máximo disponível.
-    Retorna a imagem PIL redimensionada.
-    """
+    """Abre e redimensiona a imagem mantendo a proporção para o tamanho máximo disponível."""
     img = Image.open(image_path)
     img_ratio = img.width / img.height
     frame_ratio = max_width / max_height
@@ -114,10 +113,25 @@ def image_to_bytes(img):
 # Armazena a imagem base redimensionada para aplicar os filtros
 base_img = None
 
+def rotate_image(img, max_width, max_height):
+    """Rotaciona a imagem e redimensiona para caber na tela."""
+    img = img.rotate(90, expand=True)
+
+    img_ratio = img.width / img.height
+    frame_ratio = max_width / max_height
+
+    if img_ratio > frame_ratio:
+        new_width = max_width
+        new_height = int(max_width / img_ratio)
+    else:
+        new_height = max_height
+        new_width = int(max_height * img_ratio)
+
+    img = img.resize((new_width, new_height), Image.LANCZOS)
+    return img
+
 def apply_filters(base_img, values):
-    """
-    Aplica, em sequência, os filtros selecionados à imagem base.
-    """
+    """Aplica, em sequência, os filtros selecionados à imagem base."""
     img_filtered = base_img.copy()
     if values.get('-CHK_A-'):
         img_filtered = filtro_embacado.apply(img_filtered)
@@ -142,24 +156,19 @@ while True:
         image_path = select_image()
         if image_path:
             window['-IMG_PATH-'].update(image_path)
-            window.refresh()  # Atualiza a janela para obter dimensões reais
+            window.refresh()
 
-            # Obtém as dimensões atuais da janela
             win_width = window.TKroot.winfo_width()
             win_height = window.TKroot.winfo_height()
 
-            # Define o espaço disponível para a imagem (reservando área para textos e botões)
             available_height = win_height - 150  
             available_width = (win_width // 2) - 20  
 
-            # Carrega e redimensiona a imagem
             base_img = load_and_resize_image(image_path, available_width, available_height)
             base_bytes = image_to_bytes(base_img)
-            # Atualiza ambas as imagens inicialmente com a imagem base
             window['-IMG_ESQ-'].update(data=base_bytes)
             window['-IMG_DIR-'].update(data=base_bytes)
 
-            # Reinicia os filtros (desmarca os checkboxes)
             window['-CHK_A-'].update(False)
             window['-CHK_B-'].update(False)
             window['-CHK_C-'].update(False)
@@ -167,19 +176,29 @@ while True:
             window['-CHK_E-'].update(False)
             window['-CHK_F-'].update(False)
 
-    # Se alguma checkbox for clicada e a imagem estiver carregada, atualiza a imagem da esquerda
     if event in ('-CHK_A-', '-CHK_B-', '-CHK_C-', '-CHK_D-', '-CHK_E-', '-CHK_F-') and base_img:
         filtered_img = apply_filters(base_img, values)
         filtered_bytes = image_to_bytes(filtered_img)
-        # Atualiza somente a imagem da esquerda com os filtros aplicados
         window['-IMG_ESQ-'].update(data=filtered_bytes)
+
+    if event == '-ROTATE-' and base_img:
+        win_width = window.TKroot.winfo_width()
+        win_height = window.TKroot.winfo_height()
+
+        available_height = win_height - 150  
+        available_width = (win_width // 2) - 20  
+
+        rotated_img = rotate_image(base_img, available_width, available_height)
+        rotated_bytes = image_to_bytes(rotated_img)
+        window['-IMG_ESQ-'].update(data=rotated_bytes)
+        base_img = rotated_img  
 
     if event == 'Salvar' and base_img:
         save_path = sg.popup_get_file('Salvar imagem como', save_as=True, file_types=(("PNG Files", "*.png"), ("JPEG Files", "*.jpg")))
         
-        if save_path:  # Certifica-se de que o usuário escolheu um caminho válido
-            filtered_img = apply_filters(base_img, values)  # Aplica filtros antes de salvar
-            filtered_img.save(save_path)  # Salva a imagem editada no caminho escolhido
+        if save_path:
+            filtered_img = apply_filters(base_img, values)
+            filtered_img.save(save_path)
             sg.popup('Imagem salva com sucesso!')
 
 window.close()
